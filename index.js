@@ -169,7 +169,7 @@ H) Flexible timeline`
 Your enquiry has been recorded.
 Our team will contact you shortly.
 
-🔥 *Cyber Phoenix — YOUR VISION | OUR TECHNOLOGY`
+🔥 Cyber Phoenix — YOUR VISION | OUR TECHNOLOGY`
       );
     }
 
