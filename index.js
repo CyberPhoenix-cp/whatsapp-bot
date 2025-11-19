@@ -4,119 +4,186 @@ import axios from "axios";
 const app = express();
 app.use(express.json());
 
-// Your credentials
-const VERIFY_TOKEN = VERIFY_TOKEN;
-const WHATSAPP_TOKEN = WHATSAPP_TOKEN;
-const PHONE_NUMBER_ID = PHONE_NUMBER_ID;
+// ENVIRONMENT VARIABLES
+const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
+const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN;
+const PHONE_NUMBER_ID = process.env.PHONE_NUMBER_ID;
 
-// WHATSAPP SEND MESSAGE FUNCTION
+// SEND WHATSAPP MESSAGE
 async function sendMessage(to, text) {
-  await axios.post(
-    `https://graph.facebook.com/v20.0/${PHONE_NUMBER_ID}/messages`,
-    {
-      messaging_product: "whatsapp",
-      to: to,
-      type: "text",
-      text: { body: text },
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${TOKEN}`,
-        "Content-Type": "application/json",
+  try {
+    await axios.post(
+      `https://graph.facebook.com/v20.0/${PHONE_NUMBER_ID}/messages`,
+      {
+        messaging_product: "whatsapp",
+        to: to,
+        text: { body: text },
       },
-    }
-  );
+      {
+        headers: {
+          Authorization: `Bearer ${WHATSAPP_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+  } catch (err) {
+    console.error("Send error:", err.response?.data || err.message);
+  }
 }
 
-// WEBHOOK VERIFY
+// WEBHOOK VERIFY (GET)
 app.get("/webhook", (req, res) => {
   const mode = req.query["hub.mode"];
   const token = req.query["hub.verify_token"];
   const challenge = req.query["hub.challenge"];
 
-  if (mode && token === VERIFY_TOKEN) {
+  if (mode === "subscribe" && token === VERIFY_TOKEN) {
+    console.log("Webhook verified successfully.");
     return res.status(200).send(challenge);
   }
   res.sendStatus(403);
 });
 
-// MAIN BOT LOGIC
+// MAIN BOT LOGIC (POST)
 app.post("/webhook", async (req, res) => {
-  const message = req.body.entry?.[0].changes?.[0].value?.messages?.[0];
+  const message = req.body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
 
-  if (message && message.text) {
+  if (message?.text) {
     const from = message.from;
     const text = message.text.body.trim();
 
-    // 1. FIRST GREETING
-    if (text.toLowerCase() === "hi" || text.toLowerCase() === "hello") {
+    // GREETING
+    if (["hi", "hello", "hey"].includes(text.toLowerCase())) {
       await sendMessage(
         from,
-        `👋 Hi! Welcome to *Cyber Phoenix*\nYour trusted partner for:\n\n🔥 Web Development\n🔥 App Development\n🔥 UI/UX Design\n🔥 SEO & Marketing\n🔥 AI Automation\n\nReply with a number:\n\n1️⃣ About Us\n2️⃣ Our Services\n3️⃣ Portfolio\n4️⃣ Get a Quote\n5️⃣ Contact Support`
+        `👋 Hi! Welcome to *Cyber Phoenix*
+
+🔥 Web Development
+🔥 App Development
+🔥 UI/UX Design
+🔥 SEO & Marketing
+🔥 AI Automation
+
+Reply with:
+
+1️⃣ About Us
+2️⃣ Services
+3️⃣ Portfolio
+4️⃣ Get a Quote`
       );
     }
 
-    // 2. ABOUT US
+    // ABOUT US
     else if (text === "1") {
       await sendMessage(
         from,
-        `🏢 *About Cyber Phoenix*\nWe help businesses grow with modern, reliable and affordable digital solutions.\n\nOur mission is to empower every business with technology that works.\n\nReply:\n2️⃣ See our services\n4️⃣ Get a quote`
+        `🏢 *About Cyber Phoenix*\n\nWe help businesses grow with modern, reliable and affordable digital solutions.
+
+Reply:
+2️⃣ Our services
+4️⃣ Get a quote`
       );
     }
 
-    // 3. SERVICES
+    // SERVICES
     else if (text === "2") {
       await sendMessage(
         from,
-        `🛠 *Our Services*\n\n• Website Development\n• Android/iOS App Development\n• UI/UX Design\n• SEO Optimization\n• Custom Software\n• AI Integrations\n\nReply:\n3️⃣ See portfolio\n4️⃣ Get a quote`
+        `🛠 *Our Services*
+
+• Website Development
+• Android/iOS Apps
+• UI/UX Design
+• SEO Optimization
+• Custom Software
+• AI Integrations
+
+Reply:
+3️⃣ Portfolio
+4️⃣ Get a quote`
       );
     }
 
-    // 4. PORTFOLIO
+    // PORTFOLIO
     else if (text === "3") {
       await sendMessage(
         from,
-        `📁 *Portfolio*\nHere are some sample works:\n\n🌐 Web Projects: your-link-here\n📱 App Projects: your-link-here\n🎨 UI/UX: your-link-here\n\nReply:\n4️⃣ Get a quote`
+        `📁 *Our Portfolio*
+
+🌐 Web Projects: your-link
+📱 Apps: your-link
+🎨 UI/UX: your-link
+
+Reply:
+4️⃣ Get a quote`
       );
     }
 
-    // 5. QUOTE COLLECTION
+    // QUOTE REQUEST
     else if (text === "4") {
       await sendMessage(
         from,
-        `📝 *Let's get your project details!*\n\nPlease share your project requirement in one message.\nExample:\n"I need an ecommerce website with payment gateway."`
+        `📝 Great! Please share your project requirements in one message.
+
+Example:
+"I need an e-commerce website with payment gateway."`
       );
     }
 
-    // 6. AFTER REQUIREMENT
-    else if (text.length > 5) {
+    // REQUIREMENT SHARED
+    else if (text.length > 10) {
       await sendMessage(
         from,
-        `👌 Great! Got your requirements.\n\n💰 What is your budget range?\n\nReply:\nA) Below ₹10,000\nB) ₹10,000 - ₹25,000\nC) ₹25,000 - ₹50,000\nD) Above ₹50,000`
+        `👌 Got it!
+
+💰 What is your budget?
+
+A) Below ₹10,000
+B) ₹10,000 - ₹25,000
+C) ₹25,000 - ₹50,000
+D) Above ₹50,000`
       );
     }
 
-    // 7. BUDGET ANSWER
+    // BUDGET
     else if (["A", "B", "C", "D"].includes(text.toUpperCase())) {
       await sendMessage(
         from,
-        `⏳ Last step!\nHow soon do you want the project delivered?\n\n1) 1 week\n2) 2–3 weeks\n3) 1 month\n4) Flexible timeline`
+        `⏳ Final question!
+
+When do you want the project delivered?
+
+1) 1 week
+2) 2–3 weeks
+3) 1 month
+4) Flexible timeline`
       );
     }
 
-    // 8. FINAL CONFIRMATION
+    // FINAL CONFIRMATION
     else if (["1", "2", "3", "4"].includes(text)) {
       await sendMessage(
         from,
-        `🎉 Thanks! Your enquiry is recorded.\nOur team will contact you shortly.\n\nThank you for choosing *Cyber Phoenix*! 🔥`
+        `🎉 Thank you!
+
+Your enquiry has been recorded.
+Our team will contact you shortly.
+
+🔥 *Cyber Phoenix — Powering Business Growth*`
       );
     }
 
-    // DEFAULT
+    // DEFAULT REPLY
     else {
       await sendMessage(
         from,
-        `🙏 Sorry, I didn't understand.\nPlease reply with:\n\n1️⃣ About Us\n2️⃣ Services\n3️⃣ Portfolio\n4️⃣ Get a Quote`
+        `❓ Sorry, I didn't understand.
+
+Reply:
+1️⃣ About Us
+2️⃣ Services
+3️⃣ Portfolio
+4️⃣ Get a Quote`
       );
     }
   }
@@ -126,6 +193,5 @@ app.post("/webhook", async (req, res) => {
 
 // SERVER LISTEN
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log("Server running on port", PORT);
-});
+app.listen(PORT, () => console.log("Server running on", PORT));
+
