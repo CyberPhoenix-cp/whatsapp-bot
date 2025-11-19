@@ -153,15 +153,15 @@ D) Above ₹50,000`
 
 When do you want the project delivered?
 
-1) 1 week
-2) 2–3 weeks
-3) 1 month
-4) Flexible timeline`
+E) 1 week
+F) 2–3 weeks
+G) 1 month
+H) Flexible timeline`
       );
     }
 
     // FINAL CONFIRMATION
-    else if (["1", "2", "3", "4"].includes(text)) {
+    else if (["E", "F", "G", "H"].includes(text.toUpperCase())) {
       await sendMessage(
         from,
         `🎉 Thank you!
@@ -169,7 +169,7 @@ When do you want the project delivered?
 Your enquiry has been recorded.
 Our team will contact you shortly.
 
-🔥 *Cyber Phoenix — Powering Business Growth*`
+🔥 *Cyber Phoenix — YOUR VISION | OUR TECHNOLOGY`
       );
     }
 
