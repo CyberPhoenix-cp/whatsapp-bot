@@ -5,9 +5,9 @@ const app = express();
 app.use(express.json());
 
 // Your credentials
-const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
-const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN;
-const PHONE_NUMBER_ID = process.env.PHONE_NUMBER_ID;
+const VERIFY_TOKEN = VERIFY_TOKEN;
+const WHATSAPP_TOKEN = WHATSAPP_TOKEN;
+const PHONE_NUMBER_ID = PHONE_NUMBER_ID;
 
 // WHATSAPP SEND MESSAGE FUNCTION
 async function sendMessage(to, text) {
