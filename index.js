@@ -48,12 +48,6 @@ app.get("/webhook", (req, res) => {
   }
   res.sendStatus(403);
 });
-
-// Receive messages
-app.post("/webhook", async (req, res) => {
-   ...
-});
-
 // MAIN BOT LOGIC (POST)
 app.post("/webhook", async (req, res) => {
   const message = req.body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
