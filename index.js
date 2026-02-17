@@ -31,7 +31,12 @@ async function sendMessage(to, text) {
   }
 }
 
-// WEBHOOK VERIFY (GET)
+// Root route
+app.get("/", (req, res) => {
+  res.send("WhatsApp Bot is running 🚀");
+});
+
+// Webhook verification
 app.get("/webhook", (req, res) => {
   const mode = req.query["hub.mode"];
   const token = req.query["hub.verify_token"];
@@ -42,6 +47,11 @@ app.get("/webhook", (req, res) => {
     return res.status(200).send(challenge);
   }
   res.sendStatus(403);
+});
+
+// Receive messages
+app.post("/webhook", async (req, res) => {
+   ...
 });
 
 // MAIN BOT LOGIC (POST)
